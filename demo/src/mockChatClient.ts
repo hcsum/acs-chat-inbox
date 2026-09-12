@@ -103,7 +103,7 @@ export class MockChatClient {
       content: { message: message.text },
       sender: { kind: "communicationUser", communicationUserId: message.from },
       senderDisplayName: this.nameOf(message.from),
-    } as ChatMessage;
+    };
   }
 
   /** Everything below is what the hook actually calls. */
@@ -120,7 +120,7 @@ export class MockChatClient {
                 sender: { kind: "communicationUser", communicationUserId: this.acsUserId },
                 chatMessageId: "read-marker",
                 readOn,
-              } as ChatMessageReadReceipt,
+              },
             ]
           : [];
         return paged(receipts, options?.maxPageSize);
@@ -158,7 +158,10 @@ export class MockChatClient {
     } as unknown as ChatMessageReceivedEvent;
 
     const history = this.messages.get(threadId) ?? [];
-    this.messages.set(threadId, [this.toChatMessage(threadId, { id, minutesAgo: 0, from, text }), ...history]);
+    this.messages.set(threadId, [
+      this.toChatMessage(threadId, { id, minutesAgo: 0, from, text }),
+      ...history,
+    ]);
     for (const listener of this.listeners) listener(event);
   }
 

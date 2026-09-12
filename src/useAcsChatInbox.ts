@@ -246,10 +246,13 @@ export function useAcsChatInbox({
     if (missingIds.length === 0) return;
 
     let cancelled = false;
+    // The fetch is the external system this effect synchronizes with, and
+    // `loading` is its in-flight flag; there is no render pass to hoist it to.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     // One unreachable thread — deleted, or one the user was removed from — must
     // not take the whole list's previews down with it.
-    Promise.allSettled(
+    void Promise.allSettled(
       missingIds.map((id) => fetchThreadState(id, chatClient, acsUserId, messagePageSize)),
     )
       .then((results) => {
@@ -313,7 +316,9 @@ export function useAcsChatInbox({
           (message) => message.id === event.id,
         );
         const unreadMessages =
-          counts && !alreadySeen ? [...current.unreadMessages, event] : current.unreadMessages;
+          counts && !alreadySeen
+            ? [...current.unreadMessages, event]
+            : current.unreadMessages;
         next.set(event.threadId, toState(event, unreadMessages, currentUserId));
         return next;
       });
@@ -355,8 +360,10 @@ export function useAcsChatInbox({
     });
   }, []);
 
-  // Selecting a thread reads it.
+  // Selecting a thread reads it. Read state belongs to the thread, not to this
+  // render, so it is written where the selection changes rather than derived.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (selectedThreadId) markThreadRead(selectedThreadId);
   }, [selectedThreadId, markThreadRead, threadStates.size]);
 

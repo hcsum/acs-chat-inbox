@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "description": "An inbox shell for Azure Communication Services chat: a thread list next to ChatComposite, with unread counts and latest-message previews.",
   "license": "MIT",
+  "author": "hcsum",
+  "homepage": "https://hcsum.github.io/acs-chat-inbox/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hcsum/acs-chat-inbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hcsum/acs-chat-inbox/issues"
+  },
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -15,14 +24,20 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./styles.css": {
       "types": "./dist/styles.d.css.ts",
       "default": "./dist/styles.css"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "keywords": [
     "azure",
@@ -33,11 +48,30 @@
     "inbox",
     "react"
   ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check:exports": "publint --strict && attw --pack .",
     "demo": "npm --prefix demo install && npm --prefix demo run dev",
+    "demo:build": "npm --prefix demo run build",
+    "changeset": "changeset",
+    "version": "changeset version && npm install --package-lock-only --ignore-scripts",
+    "release": "changeset publish",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -48,14 +82,29 @@
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@azure/communication-chat": "^1.6.0",
     "@azure/communication-common": "^2.3.1",
     "@azure/communication-react": "^1.34.0",
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.2",
+    "@eslint/js": "^10.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@vitest/coverage-v8": "^5.0.0",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.4.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "publint": "^0.3.24",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.0"
   }
 }

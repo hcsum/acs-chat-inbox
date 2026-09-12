@@ -1,0 +1,56 @@
+name: Bug report
+description: Something in the package behaves differently from what it documents.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce
+      description: >
+        The smallest code that shows it. A StackBlitz or a repo is ideal; the
+        props you pass to `AcsChatInbox` or `useAcsChatInbox` are the minimum.
+      render: tsx
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: acs-chat-inbox version
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: acs-version
+    attributes:
+      label: "@azure/communication-react and @azure/communication-chat versions"
+      placeholder: 1.34.0 / 1.6.0
+    validations:
+      required: true
+
+  - type: input
+    id: react-version
+    attributes:
+      label: React version and framework
+      placeholder: React 18.3.1, Next.js 15 App Router
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: stability
+    attributes:
+      label: Checked first
+      options:
+        - label: >
+            `credential` and `userId` are referentially stable across renders
+            (a fresh object each render rebuilds the chat adapter).
+          required: true

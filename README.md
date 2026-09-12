@@ -1,5 +1,11 @@
 # acs-chat-inbox
 
+[![npm](https://img.shields.io/npm/v/acs-chat-inbox.svg?color=cb3837&logo=npm)](https://www.npmjs.com/package/acs-chat-inbox)
+[![CI](https://github.com/hcsum/acs-chat-inbox/actions/workflows/ci.yml/badge.svg)](https://github.com/hcsum/acs-chat-inbox/actions/workflows/ci.yml)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/acs-chat-inbox?label=minzipped)](https://bundlephobia.com/package/acs-chat-inbox)
+[![types](https://img.shields.io/npm/types/acs-chat-inbox)](https://www.npmjs.com/package/acs-chat-inbox)
+[![license](https://img.shields.io/npm/l/acs-chat-inbox.svg)](./LICENSE)
+
 An inbox shell for Azure Communication Services chat: a thread list beside
 [`ChatComposite`](https://azure.github.io/communication-ui-library/?path=/docs/composites-chat-basicexample--docs),
 with unread counts and latest-message previews.
@@ -7,6 +13,9 @@ with unread counts and latest-message previews.
 `@azure/communication-react` ships the chat pane but no thread list, so every app
 that needs a WhatsApp-style two-pane inbox rebuilds the same shell. This is that
 shell, and nothing else.
+
+**[Live demo](https://hcsum.github.io/acs-chat-inbox/)** — runs against an
+in-memory stand-in for `ChatClient`, so no Azure resource is needed to try it.
 
 ## Install
 
@@ -43,14 +52,8 @@ import "acs-chat-inbox/styles.css";
 function Inbox({ endpoint, token, acsUserId, displayName, threads }) {
   const [selectedThreadId, setSelectedThreadId] = useState<string>();
 
-  const credential = useMemo(
-    () => new AzureCommunicationTokenCredential(token),
-    [token],
-  );
-  const userId = useMemo(
-    () => ({ communicationUserId: acsUserId }),
-    [acsUserId],
-  );
+  const credential = useMemo(() => new AzureCommunicationTokenCredential(token), [token]);
+  const userId = useMemo(() => ({ communicationUserId: acsUserId }), [acsUserId]);
 
   return (
     <AcsChatInbox
@@ -120,17 +123,17 @@ you can skip the stylesheet entirely and write your own:
 [data-slot="unread-badge"] { … }
 ```
 
-| `data-slot` | element |
-| --- | --- |
-| `acs-chat-inbox` | root, the two-pane container; `data-pane` is `list` / `chat` |
-| `thread-list` | sidebar; `data-state` is `loading` / `empty` / `ready` |
-| `thread-list-header` | the "Chats" header |
-| `thread-list-items` | scrolling list |
-| `thread-item` | one thread; `data-state` `selected` / `idle`, `data-unread` `true` / `false` |
-| `thread-avatar`, `thread-title`, `thread-preview`, `thread-time`, `unread-badge` | parts of an item |
-| `chat-pane` | right pane; `data-state` is `empty` / `loading` / `ready` |
-| `chat-back` | back control, shown only in the narrow layout |
-| `chat-body` | wrapper around `ChatComposite` or the empty state |
+| `data-slot`                                                                      | element                                                                      |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `acs-chat-inbox`                                                                 | root, the two-pane container; `data-pane` is `list` / `chat`                 |
+| `thread-list`                                                                    | sidebar; `data-state` is `loading` / `empty` / `ready`                       |
+| `thread-list-header`                                                             | the "Chats" header                                                           |
+| `thread-list-items`                                                              | scrolling list                                                               |
+| `thread-item`                                                                    | one thread; `data-state` `selected` / `idle`, `data-unread` `true` / `false` |
+| `thread-avatar`, `thread-title`, `thread-preview`, `thread-time`, `unread-badge` | parts of an item                                                             |
+| `chat-pane`                                                                      | right pane; `data-state` is `empty` / `loading` / `ready`                    |
+| `chat-back`                                                                      | back control, shown only in the narrow layout                                |
+| `chat-body`                                                                      | wrapper around `ChatComposite` or the empty state                            |
 
 **3. `classNames` and `renderThreadItem`.** For Tailwind, or to take the item
 over completely:
@@ -173,9 +176,9 @@ so the thread stays selected and highlighted when the list comes back.
 ```tsx
 <AcsChatInbox
   {...acs}
-  backLabel="← Inbox"     // default: "← Chats"
+  backLabel="← Inbox" // default: "← Chats"
   onBack={() => track("inbox:back")}
-  showBackButton={false}  // to render your own instead
+  showBackButton={false} // to render your own instead
 />
 ```
 
@@ -184,9 +187,15 @@ override the block:
 
 ```css
 @container acs-inbox (max-width: 60rem) {
-  [data-pane="chat"] [data-slot="thread-list"] { display: none; }
-  [data-pane="list"] [data-slot="chat-pane"] { display: none; }
-  [data-slot="chat-back"] { display: flex; }
+  [data-pane="chat"] [data-slot="thread-list"] {
+    display: none;
+  }
+  [data-pane="list"] [data-slot="chat-pane"] {
+    display: none;
+  }
+  [data-slot="chat-back"] {
+    display: flex;
+  }
 }
 ```
 
@@ -207,11 +216,13 @@ The `acs-inbox-unread-badge` class works outside the inbox, so a top-bar badge
 can match the ones in the list:
 
 ```tsx
-{totalUnreadCount > 0 && (
-  <span data-slot="unread-badge" className="acs-inbox-unread-badge">
-    {totalUnreadCount}
-  </span>
-)}
+{
+  totalUnreadCount > 0 && (
+    <span data-slot="unread-badge" className="acs-inbox-unread-badge">
+      {totalUnreadCount}
+    </span>
+  );
+}
 ```
 
 It falls back to the default colours there. The package's variables are defined
@@ -265,6 +276,19 @@ any thread in `threads` it has not seen yet.
 
 The same applies to archiving, pagination and search: they are list operations,
 and the list is yours.
+
+## Contributing
+
+Issues and pull requests are welcome; read
+[CONTRIBUTING.md](./CONTRIBUTING.md) first, and
+[AGENTS.md](./AGENTS.md) if you are proposing something new — it says what the
+package deliberately will not grow into.
+
+Releases are automated: changes carry a
+[changeset](https://github.com/changesets/changesets), merging to `main` opens a
+"Version Packages" pull request, and merging that publishes to npm with
+[provenance](https://docs.npmjs.com/generating-provenance-statements) and cuts
+the GitHub release.
 
 ## License
 

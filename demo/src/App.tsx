@@ -42,10 +42,25 @@ const SEEDS: MockThreadSeed[] = [
     threadId: "thread-1",
     readMinutesAgo: 40,
     messages: [
-      { id: "1", minutesAgo: 90, from: "8:acs:ada", text: "Did the analytical engine build pass?" },
+      {
+        id: "1",
+        minutesAgo: 90,
+        from: "8:acs:ada",
+        text: "Did the analytical engine build pass?",
+      },
       { id: "2", minutesAgo: 60, from: ME, text: "Green on the second run." },
-      { id: "3", minutesAgo: 12, from: "8:acs:ada", text: "Nice. I'll cut the release note." },
-      { id: "4", minutesAgo: 4, from: "8:acs:ada", text: "Sent — take a look when you can." },
+      {
+        id: "3",
+        minutesAgo: 12,
+        from: "8:acs:ada",
+        text: "Nice. I'll cut the release note.",
+      },
+      {
+        id: "4",
+        minutesAgo: 4,
+        from: "8:acs:ada",
+        text: "Sent — take a look when you can.",
+      },
     ],
   },
   {
@@ -95,7 +110,13 @@ const NAMES: Record<string, string> = {
   ),
 };
 
-const SENDERS = ["8:acs:ada", "8:acs:grace", "8:acs:katherine", "8:acs:radia", "8:acs:barbara"];
+const SENDERS = [
+  "8:acs:ada",
+  "8:acs:grace",
+  "8:acs:katherine",
+  "8:acs:radia",
+  "8:acs:barbara",
+];
 const LINES = [
   "Any update on this?",
   "Pushed a fix, mind reviewing?",
@@ -138,8 +159,8 @@ export function App() {
   }, [client]);
 
   const simulateIncoming = (thread: AcsThread) => {
-    const sender = thread.participants?.[0]?.acsUserId ?? SENDERS[0]!;
-    const line = LINES[nextLine.current++ % LINES.length]!;
+    const sender = thread.participants?.[0]?.acsUserId ?? SENDERS[0];
+    const line = LINES[nextLine.current++ % LINES.length];
     client.send(thread.id, sender, line);
   };
 
@@ -147,7 +168,7 @@ export function App() {
   // thread raises the badge, one in the open thread must not.
   const incomingElsewhere = () => {
     const candidates = THREADS.filter((thread) => thread.id !== selectedThreadId);
-    simulateIncoming(candidates[Math.floor(Math.random() * candidates.length)]!);
+    simulateIncoming(candidates[Math.floor(Math.random() * candidates.length)]);
   };
 
   const incomingHere = () => {
@@ -171,7 +192,8 @@ export function App() {
     "--acs-inbox-radius": `${radius}rem`,
   } as React.CSSProperties;
 
-  const chatPaneActive = selectedThreadId !== undefined && selectedThreadId !== dismissedThreadId;
+  const chatPaneActive =
+    selectedThreadId !== undefined && selectedThreadId !== dismissedThreadId;
   const history = selectedThreadId ? client.history(selectedThreadId) : [];
   const historyLength = history.length;
 
@@ -205,8 +227,8 @@ export function App() {
       <p className="demo-note">
         Not connected to ACS. Message history, read receipts and realtime events come from{" "}
         <code>demo/src/mockChatClient.ts</code>. The left pane is <code>AcsThreadList</code>{" "}
-        rendering state from <code>useAcsChatInbox</code>. The right pane is demo code in place of{" "}
-        <code>ChatComposite</code>, which needs a live endpoint and token.
+        rendering state from <code>useAcsChatInbox</code>. The right pane is demo code in
+        place of <code>ChatComposite</code>, which needs a live endpoint and token.
       </p>
 
       <div className="demo-controls">
@@ -288,7 +310,9 @@ export function App() {
                 ← Chats
               </button>
               <div className="demo-messages" ref={messagesRef}>
-                {history.length === 0 && <div className="acs-inbox-empty">No messages yet</div>}
+                {history.length === 0 && (
+                  <div className="acs-inbox-empty">No messages yet</div>
+                )}
                 {history.map((message) => (
                   <div
                     key={message.id}

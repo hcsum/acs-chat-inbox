@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Azure Communication Services support
+    url: https://learn.microsoft.com/azure/communication-services/
+    about: Questions about ACS itself — tokens, identities, the chat SDK — belong with Azure, not here.
+  - name: Question or idea
+    url: https://github.com/hcsum/acs-chat-inbox/discussions
+    about: Ask a question or float an idea before opening an issue.

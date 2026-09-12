@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose something the package should do.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        The package deliberately stops at the inbox shell: thread list,
+        selection, unread counts, previews. Fetching threads, creating them, a
+        user picker, auth, calling, and a fixed visual system are out of scope —
+        they are opinions about a product, not about ACS. `AGENTS.md` has the
+        full list and the reasoning.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to build, and where the package gets in the way.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: >
+        If it is a new prop or render hook, sketch the signature. If the
+        existing escape hatches (`renderThreadItem`, `sidebarTitle`,
+        `classNames`, the headless `useAcsChatInbox`) nearly work, say where
+        they fall short.
+    validations:
+      required: true

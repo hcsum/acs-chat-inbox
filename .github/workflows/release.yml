@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Version or publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # commit the version bump and create the GitHub release
+      pull-requests: write # open and update the "Version Packages" PR
+      id-token: write # mint the OIDC token npm trusted publishing needs
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # changesets reads the history to build the changelog
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing (OIDC) needs npm 11.5.1 or newer; Node 22 ships an
+      # older one. No NPM_TOKEN is involved: npm exchanges the workflow's OIDC
+      # token for a short-lived credential and attaches build provenance.
+      - name: Use an npm that can publish with OIDC
+        run: npm install -g npm@latest
+
+      - run: npm ci
+
+      - name: Verify before publishing
+        run: |
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run build
+          npm run check:exports
+
+      # npm's trusted publishing is configured per package, so it can only be
+      # set up once the package exists. Until the first release is published by
+      # hand, this workflow stays in version-PR-only mode instead of failing on
+      # a publish it has no credentials for.
+      - name: Is the package on npm yet?
+        id: npm
+        run: |
+          if npm view acs-chat-inbox version > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::acs-chat-inbox is not on npm yet — publishing is skipped."
+          fi
+
+      # With changesets pending, this opens or updates the "Version Packages"
+      # PR. With none pending (i.e. that PR was just merged), it publishes the
+      # new version to npm and tags the GitHub release.
+      - name: Create the version PR, or publish
+        uses: changesets/action@v1
+        with:
+          version: npm run version
+          publish: ${{ steps.npm.outputs.exists == 'true' && 'npm run release' || '' }}
+          commit: "chore: version packages"
+          title: "chore: version packages"
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

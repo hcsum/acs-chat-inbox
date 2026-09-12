@@ -46,7 +46,10 @@ export function stripHtml(html?: string): string {
     .trim();
 }
 
-export function isFromUser(message: AcsInboxMessage | undefined, acsUserId: string): boolean {
+export function isFromUser(
+  message: AcsInboxMessage | undefined,
+  acsUserId: string,
+): boolean {
   return (
     message?.sender?.kind === "communicationUser" &&
     message.sender.communicationUserId === acsUserId

@@ -62,8 +62,13 @@ src/AcsChatInbox.tsx   the two-pane component
 src/utils.ts           cx, stripHtml, preview, relative time
 src/styles.css         default skin, all values as CSS variables
 
+src/*.test.ts(x)       vitest; excluded from the build by tsup's explicit entry
+
 demo/                  Vite playground, not published (`files` is `["dist"]`)
 demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
+
+.changeset/            pending release notes, one file per change
+.github/workflows/     ci.yml, release.yml, pages.yml
 ```
 
 ## Things that are easy to get wrong
@@ -79,7 +84,11 @@ demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
   selection itself (`activeAdapter`), and everything downstream uses that.
 - The thread-state effect in `useAcsChatInbox` omits `threadStates` from its
   deps on purpose (it writes that state; including it loops). There is an
-  eslint-disable comment saying so.
+  eslint-disable comment saying so. Two more disables cover
+  `react-hooks/set-state-in-effect` (eslint-plugin-react-hooks 7's compiler
+  rule): `setLoading(true)` beside the fetch it flags, and `markThreadRead` on
+  selection. Both are effects synchronizing with something outside React, which
+  is what that rule's exception is for — read the comments before "fixing" them.
 - History is read **one page deep** (`firstPage`), not with `for await`: the
   SDK's iterator pages all the way back to the start of a thread, so a plain
   `for await` is dozens of serial requests on first render. Page size comes from
@@ -115,11 +124,24 @@ demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
 ## Verification
 
 ```sh
-npm run typecheck   # tsc --noEmit
-npm run build       # tsup -> dist (ESM + CJS + d.ts + styles.css)
-npm run demo        # installs demo deps, then vite on :5173
+npm run typecheck      # tsc --noEmit
+npm run lint           # eslint (flat config, type-checked rules + react-hooks)
+npm run format:check   # prettier
+npm test               # vitest: utils, the hook's unread arithmetic, the list
+npm run build          # tsup -> dist (ESM + CJS + d.ts + styles.css)
+npm run check:exports  # publint + attw against the packed tarball
+npm run demo           # installs demo deps, then vite on :5173
 npm --prefix demo run typecheck   # the demo has its own tsc; root typecheck misses it
 ```
+
+CI (`.github/workflows/ci.yml`) runs all of those plus a Node 20/22/24 ×
+React 18/19 matrix, since the peer range claims all six.
+
+`check:exports` is not optional ceremony: it caught the original `exports` map
+handing `dist/index.d.ts` to CJS consumers, which made the package masquerade as
+ESM under `node16` resolution. Types are now split per condition
+(`import` -> `.d.ts`, `require` -> `.d.cts`). `.attw.json` excludes the
+`./styles.css` entrypoint — a stylesheet has no Node resolution to get right.
 
 `npm run build` ends in `scripts/postbuild.mjs`, which writes `dist/styles.d.css.ts`
 and prepends `"use client"` to the two bundles. The directive cannot be a tsup
@@ -164,10 +186,34 @@ behaviour (paging, redelivery, token refresh) are still unproven.
 - Decide whether thread-list pagination belongs here. lyfly has infinite scroll;
   v0.1 deliberately left it out. If it comes back, it should be an `onEndReached`
   callback, not a data-fetching concern inside the package.
-- Publish: needs an npm account with 2FA, then `npm publish --access public`.
-  There is no CI and no test suite yet.
+- Validate against a live ACS resource. Everything so far runs against the fake
+  `ChatClient`; `ChatComposite` wiring has never been exercised for real.
+
+## Releasing
+
+Automated; nothing is published by hand.
+
+1. A change that reaches npm carries a changeset (`npm run changeset`),
+   committed with the change. CI-only, docs-only and demo-only changes do not.
+2. Merging to `main` runs `release.yml`, which collects pending changesets into
+   a **"Version Packages"** pull request: version bump + `CHANGELOG.md`.
+3. Merging that PR publishes to npm and cuts the GitHub release. The changelog
+   comes from `@changesets/changelog-github`, so entries link their PR and
+   author.
+
+Publishing uses **npm trusted publishing (OIDC)**: no `NPM_TOKEN` exists
+anywhere in the repo. The job mints a short-lived credential from its own
+GitHub OIDC token, which is also what produces the provenance attestation
+(`publishConfig.provenance`). It needs npm >= 11.5.1, hence the
+`npm install -g npm@latest` step before `npm ci`. Two consequences: the
+publishing workflow's filename is part of the trust configuration on npmjs.com
+— renaming `release.yml` breaks publishing until the setting is updated — and a
+local `npm publish` is not part of the process.
+
+`pages.yml` deploys `demo/` to <https://hcsum.github.io/acs-chat-inbox/> on
+every push to `main`, building with `DEMO_BASE=/acs-chat-inbox/` so the asset
+URLs carry the repo prefix.
 
 ## Git
 
-Everything so far is one initial commit on `main`; there is no remote. Don't
-commit automatically — ask.
+Don't commit automatically — ask.

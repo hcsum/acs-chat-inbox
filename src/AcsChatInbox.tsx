@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import type { CommunicationTokenCredential, CommunicationUserIdentifier } from "@azure/communication-common";
+import type {
+  CommunicationTokenCredential,
+  CommunicationUserIdentifier,
+} from "@azure/communication-common";
 import type { ChatClient } from "@azure/communication-chat";
 import type { ChatAdapter, ChatCompositeProps } from "@azure/communication-react";
-import { ChatComposite, useAzureCommunicationChatAdapter } from "@azure/communication-react";
+import {
+  ChatComposite,
+  useAzureCommunicationChatAdapter,
+} from "@azure/communication-react";
 import { AcsThreadList } from "./AcsThreadList.js";
 import { useAcsChatInbox } from "./useAcsChatInbox.js";
 import type { AcsChatInboxClassNames, AcsThread, AcsThreadItemState } from "./types.js";
@@ -78,7 +84,8 @@ export function AcsChatInbox({
   // the consumer's, so the narrow layout remembers which thread it stepped out
   // of instead of asking them to clear it.
   const [dismissedThreadId, setDismissedThreadId] = useState<string | undefined>();
-  const chatPaneActive = selectedThreadId !== undefined && selectedThreadId !== dismissedThreadId;
+  const chatPaneActive =
+    selectedThreadId !== undefined && selectedThreadId !== dismissedThreadId;
 
   const handleThreadSelect = useCallback(
     (thread: AcsThread) => {
@@ -162,12 +169,18 @@ export function AcsChatInbox({
           </button>
         )}
 
-        <div data-slot="chat-body" className={cx("acs-inbox-chat-body", classNames?.chatBody)}>
+        <div
+          data-slot="chat-body"
+          className={cx("acs-inbox-chat-body", classNames?.chatBody)}
+        >
           {activeAdapter ? (
             <ChatComposite adapter={activeAdapter} options={chatOptions} />
           ) : (
             (renderNoThreadSelected?.() ?? (
-              <div data-slot="chat-pane-empty" className={cx("acs-inbox-empty", classNames?.empty)}>
+              <div
+                data-slot="chat-pane-empty"
+                className={cx("acs-inbox-empty", classNames?.empty)}
+              >
                 {selectedThreadId ? "Loading chat…" : "No chat selected"}
               </div>
             ))

@@ -2,7 +2,11 @@
    `src/styles.css` plus the CSS variables the controls above set. */
 
 :root {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   color: #111827;
   background: #f9fafb;
 }

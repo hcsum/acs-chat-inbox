@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+    # The ACS SDKs are peer dependencies; the range in package.json is the
+    # contract, and bumping the dev copy must not quietly narrow it.
+    ignore:
+      - dependency-name: "@azure/*"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: npm
+    directory: /demo
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
