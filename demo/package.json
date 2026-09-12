@@ -12,7 +12,6 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@azure/communication-chat": "^1.6.0-beta.7",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.1",

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { ReactNode } from "react";
 import type {
   AcsChatInboxClassNames,
@@ -70,81 +71,114 @@ export function AcsThreadList({
             </div>
           ))}
 
-        {threads.map((thread) => {
-          const selected = thread.id === selectedThreadId;
-          const state = getThreadState(thread.id);
-          const itemState: AcsThreadItemState = { ...state, selected };
-
-          if (renderThreadItem) {
-            return (
-              <div key={thread.id} data-slot="thread-item-wrapper">
-                {renderThreadItem(thread, itemState)}
-              </div>
-            );
-          }
-
-          const name = getThreadTitle(thread);
-          const avatarUrl = thread.participants?.[0]?.avatarUrl;
-          // Unread on the open thread is noise: the user is looking at it.
-          const unreadCount = selected ? 0 : state.unreadCount;
-          const time = state.latestMessage?.createdOn;
-
-          return (
-            <button
-              key={thread.id}
-              type="button"
-              data-slot="thread-item"
-              data-state={selected ? "selected" : "idle"}
-              data-unread={unreadCount > 0 ? "true" : "false"}
-              aria-current={selected}
-              onClick={() => onThreadSelect(thread)}
-              className={cx(
-                "acs-inbox-thread-item",
-                classNames?.threadItem,
-                selected && "acs-inbox-thread-item--selected",
-                selected && classNames?.activeThreadItem,
-              )}
-            >
-              <span data-slot="thread-item-row" className="acs-inbox-thread-item-row">
-                <span data-slot="thread-avatar" className="acs-inbox-avatar">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="" className="acs-inbox-avatar-image" />
-                  ) : (
-                    getInitials(name)
-                  )}
-                </span>
-                <span data-slot="thread-title" className="acs-inbox-thread-title">
-                  {name}
-                </span>
-                {unreadCount > 0 && (
-                  <span data-slot="unread-badge" className="acs-inbox-unread-badge">
-                    {unreadCount}
-                  </span>
-                )}
-              </span>
-
-              <span data-slot="thread-preview" className="acs-inbox-thread-preview">
-                {state.latestMessage ? (
-                  <>
-                    {state.latestMessageFromMe && (
-                      <span data-slot="thread-preview-prefix">{ownMessagePrefix}</span>
-                    )}
-                    {state.latestMessagePreview}
-                  </>
-                ) : (
-                  "No messages yet"
-                )}
-              </span>
-
-              {time && (
-                <span data-slot="thread-time" className="acs-inbox-thread-time">
-                  {formatTime(time)}
-                </span>
-              )}
-            </button>
-          );
-        })}
+        {threads.map((thread) => (
+          <ThreadItem
+            key={thread.id}
+            thread={thread}
+            selected={thread.id === selectedThreadId}
+            state={getThreadState(thread.id)}
+            onThreadSelect={onThreadSelect}
+            formatTime={formatTime}
+            ownMessagePrefix={ownMessagePrefix}
+            {...(renderThreadItem !== undefined ? { renderThreadItem } : {})}
+            {...(classNames !== undefined ? { classNames } : {})}
+          />
+        ))}
       </div>
     </div>
   );
 }
+
+type ThreadItemProps = {
+  thread: AcsThread;
+  selected: boolean;
+  state: AcsThreadState;
+  onThreadSelect: (thread: AcsThread) => void;
+  formatTime: (date: Date) => string;
+  ownMessagePrefix: string;
+  renderThreadItem?: (thread: AcsThread, state: AcsThreadItemState) => ReactNode;
+  classNames?: AcsChatInboxClassNames;
+};
+
+/**
+ * One row, memoized: `getThreadState` returns a new map on every realtime
+ * message, and without this every thread in the list re-renders for a message
+ * that belongs to one of them. Only pays off while the props a consumer passes
+ * (`onThreadSelect`, `classNames`, `renderThreadItem`) are referentially stable.
+ */
+const ThreadItem = memo(function ThreadItem({
+  thread,
+  selected,
+  state,
+  onThreadSelect,
+  formatTime,
+  ownMessagePrefix,
+  renderThreadItem,
+  classNames,
+}: ThreadItemProps): ReactNode {
+  const itemState: AcsThreadItemState = { ...state, selected };
+
+  if (renderThreadItem) {
+    return <div data-slot="thread-item-wrapper">{renderThreadItem(thread, itemState)}</div>;
+  }
+
+  const name = getThreadTitle(thread);
+  const avatarUrl = thread.participants?.[0]?.avatarUrl;
+  // Unread on the open thread is noise: the user is looking at it.
+  const unreadCount = selected ? 0 : state.unreadCount;
+  const time = state.latestMessage?.createdOn;
+
+  return (
+    <button
+      type="button"
+      data-slot="thread-item"
+      data-state={selected ? "selected" : "idle"}
+      data-unread={unreadCount > 0 ? "true" : "false"}
+      aria-current={selected}
+      onClick={() => onThreadSelect(thread)}
+      className={cx(
+        "acs-inbox-thread-item",
+        classNames?.threadItem,
+        selected && "acs-inbox-thread-item--selected",
+        selected && classNames?.activeThreadItem,
+      )}
+    >
+      <span data-slot="thread-item-row" className="acs-inbox-thread-item-row">
+        <span data-slot="thread-avatar" className="acs-inbox-avatar">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="acs-inbox-avatar-image" />
+          ) : (
+            getInitials(name)
+          )}
+        </span>
+        <span data-slot="thread-title" className="acs-inbox-thread-title">
+          {name}
+        </span>
+        {unreadCount > 0 && (
+          <span data-slot="unread-badge" className="acs-inbox-unread-badge">
+            {unreadCount}
+          </span>
+        )}
+      </span>
+
+      <span data-slot="thread-preview" className="acs-inbox-thread-preview">
+        {state.latestMessage ? (
+          <>
+            {state.latestMessageFromMe && (
+              <span data-slot="thread-preview-prefix">{ownMessagePrefix}</span>
+            )}
+            {state.latestMessagePreview}
+          </>
+        ) : (
+          "No messages yet"
+        )}
+      </span>
+
+      {time && (
+        <span data-slot="thread-time" className="acs-inbox-thread-time">
+          {formatTime(time)}
+        </span>
+      )}
+    </button>
+  );
+});

@@ -36,8 +36,33 @@ function minutesAgo(minutes: number): Date {
   return new Date(Date.now() - minutes * 60_000);
 }
 
-async function* iterate<T>(items: T[]): AsyncGenerator<T> {
-  for (const item of items) yield item;
+/**
+ * The hook reads one page and stops, so the mock has to page like the SDK does:
+ * `byPage()` yields arrays, and the page size comes from the list call's options
+ * rather than from `byPage` itself.
+ */
+function paged<T>(items: T[], maxPageSize?: number) {
+  const size = maxPageSize && maxPageSize > 0 ? maxPageSize : items.length || 1;
+  const pages: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    pages.push(items.slice(index, index + size));
+  }
+
+  async function* iterateItems(): AsyncGenerator<T> {
+    for (const page of pages) for (const item of page) yield item;
+  }
+  async function* iteratePages(): AsyncGenerator<T[]> {
+    for (const page of pages) yield page;
+  }
+
+  const items$ = iterateItems();
+  return {
+    next: () => items$.next(),
+    [Symbol.asyncIterator]() {
+      return this;
+    },
+    byPage: () => iteratePages(),
+  };
 }
 
 export class MockChatClient {
@@ -85,8 +110,9 @@ export class MockChatClient {
 
   getChatThreadClient(threadId: string) {
     return {
-      listMessages: () => iterate(this.messages.get(threadId) ?? []),
-      listReadReceipts: () => {
+      listMessages: (options?: { maxPageSize?: number }) =>
+        paged(this.messages.get(threadId) ?? [], options?.maxPageSize),
+      listReadReceipts: (options?: { maxPageSize?: number }) => {
         const readOn = this.readOn.get(threadId);
         const receipts: ChatMessageReadReceipt[] = readOn
           ? [
@@ -97,12 +123,14 @@ export class MockChatClient {
               } as ChatMessageReadReceipt,
             ]
           : [];
-        return iterate(receipts);
+        return paged(receipts, options?.maxPageSize);
       },
     };
   }
 
   async startRealtimeNotifications(): Promise<void> {}
+
+  async stopRealtimeNotifications(): Promise<void> {}
 
   on(_event: "chatMessageReceived", listener: Listener): void {
     this.listeners.add(listener);

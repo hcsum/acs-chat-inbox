@@ -9,8 +9,7 @@ export default defineConfig({
   treeshake: true,
   external: ["react", "react-dom"],
   loader: { ".css": "copy" },
-  // TypeScript resolves types for `import "pkg/styles.css"` from a
-  // `.d.css.ts` file, which tsup does not emit on its own.
-  onSuccess:
-    "node -e \"require('fs').copyFileSync('dist/styles.d.ts','dist/styles.d.css.ts')\"",
+  // Adds the `"use client"` directive (see the script for why it cannot be a
+  // `banner`) and the `.d.css.ts` types for the stylesheet.
+  onSuccess: "node scripts/postbuild.mjs",
 });

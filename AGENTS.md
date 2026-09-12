@@ -71,12 +71,24 @@ demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
 - **`credential` and `userId` must be referentially stable** in consuming code.
   A fresh object each render rebuilds the chat adapter. The README says so;
   keep saying so.
-- `useAzureCommunicationChatAdapter` takes `Partial<args>` and returns
-  `undefined` when `threadId` is missing. That is why the unselected state needs
-  no conditional hook — don't "fix" it by splitting out a child component.
+- `useAzureCommunicationChatAdapter` takes `Partial<args>`, so the unselected
+  state needs no conditional hook — don't "fix" it by splitting out a child
+  component. But it does **not** return `undefined` once `threadId` goes away:
+  with a field missing its effect just returns, leaving the adapter it already
+  built in place (checked against 1.34.0). `AcsChatInbox` therefore gates on the
+  selection itself (`activeAdapter`), and everything downstream uses that.
 - The thread-state effect in `useAcsChatInbox` omits `threadStates` from its
   deps on purpose (it writes that state; including it loops). There is an
   eslint-disable comment saying so.
+- History is read **one page deep** (`firstPage`), not with `for await`: the
+  SDK's iterator pages all the way back to the start of a thread, so a plain
+  `for await` is dozens of serial requests on first render. Page size comes from
+  the list call's options — the SDK ignores `byPage`'s own `maxPageSize`.
+- The fetch merges into the map instead of overwriting it (`mergeStates`):
+  realtime messages and `markThreadRead` both land while it is in flight.
+- Realtime events use a different `type` vocabulary from the REST enum:
+  `"Text"` / `"RichText/Html"`, not `"text"` / `"html"`. Nothing filters on the
+  realtime path today; if that changes, don't copy the lowercase comparison.
 - Previews render as plain text. lyfly used `dangerouslySetInnerHTML` for
   `html`-type messages; the package strips tags instead. Don't reintroduce it.
 - Styles: three layers — CSS variables, `data-slot` / `data-state` attributes,
@@ -106,12 +118,24 @@ demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
 npm run typecheck   # tsc --noEmit
 npm run build       # tsup -> dist (ESM + CJS + d.ts + styles.css)
 npm run demo        # installs demo deps, then vite on :5173
+npm --prefix demo run typecheck   # the demo has its own tsc; root typecheck misses it
 ```
+
+`npm run build` ends in `scripts/postbuild.mjs`, which writes `dist/styles.d.css.ts`
+and prepends `"use client"` to the two bundles. The directive cannot be a tsup
+`banner`: `treeshake: true` runs the output through rollup afterwards, and rollup
+drops module-level directives. The script shifts each sourcemap by one line to
+match.
+
+The demo deliberately has no `@azure/communication-chat` of its own — it reads the
+root's copy. Two copies means two declarations of `ChatClient`, and its private
+fields make them incompatible, so `mockChatClient.asChatClient()` stops typechecking.
 
 The demo runs `AcsThreadList` and `useAcsChatInbox` against a mock `ChatClient`
 (`demo/src/mockChatClient.ts`) that implements only what the hook calls:
-`getChatThreadClient().listMessages()`, `listReadReceipts()`,
-`startRealtimeNotifications()`, and `on/off("chatMessageReceived")`. Unread
+`getChatThreadClient().listMessages()`, `listReadReceipts()` — both paged the
+way the SDK pages, since the hook reads only the first page —
+`start`/`stopRealtimeNotifications()`, and `on/off("chatMessageReceived")`. Unread
 counts, read-receipt handling and previews run against that mock rather than
 being stubbed out, so they can be checked without an ACS resource. It imports
 from `../../src` directly, skipping `AcsChatInbox` and therefore

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { CommunicationTokenCredential, CommunicationUserIdentifier } from "@azure/communication-common";
 import type { ChatClient } from "@azure/communication-chat";
@@ -101,8 +101,6 @@ export function AcsChatInbox({
     selectedThreadId,
   });
 
-  // With `threadId` undefined the hook returns undefined instead of building an
-  // adapter, which is how the unselected state is handled without a conditional hook.
   const adapter = useAzureCommunicationChatAdapter({
     endpoint,
     userId,
@@ -111,9 +109,21 @@ export function AcsChatInbox({
     threadId: selectedThreadId,
   });
 
+  // ACS's hook bails out when `threadId` is missing: it neither clears its state
+  // nor disposes the adapter it already built, so after a deselect `adapter` is
+  // still the previous thread's. Gate on the selection rather than on the hook.
+  const activeAdapter = selectedThreadId ? adapter : undefined;
+
+  // A consumer passing an inline arrow would otherwise fire this on every render,
+  // and looping if it sets state.
+  const onChatAdapterChangeRef = useRef(onChatAdapterChange);
   useEffect(() => {
-    onChatAdapterChange?.(adapter);
-  }, [adapter, onChatAdapterChange]);
+    onChatAdapterChangeRef.current = onChatAdapterChange;
+  });
+
+  useEffect(() => {
+    onChatAdapterChangeRef.current?.(activeAdapter);
+  }, [activeAdapter]);
 
   return (
     <div
@@ -138,7 +148,7 @@ export function AcsChatInbox({
 
       <div
         data-slot="chat-pane"
-        data-state={adapter ? "ready" : selectedThreadId ? "loading" : "empty"}
+        data-state={activeAdapter ? "ready" : selectedThreadId ? "loading" : "empty"}
         className={cx("acs-inbox-chat", classNames?.chat)}
       >
         {showBackButton && chatPaneActive && (
@@ -153,8 +163,8 @@ export function AcsChatInbox({
         )}
 
         <div data-slot="chat-body" className={cx("acs-inbox-chat-body", classNames?.chatBody)}>
-          {adapter ? (
-            <ChatComposite adapter={adapter} options={chatOptions} />
+          {activeAdapter ? (
+            <ChatComposite adapter={activeAdapter} options={chatOptions} />
           ) : (
             (renderNoThreadSelected?.() ?? (
               <div data-slot="chat-pane-empty" className={cx("acs-inbox-empty", classNames?.empty)}>
