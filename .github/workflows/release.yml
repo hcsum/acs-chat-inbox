@@ -65,7 +65,7 @@ jobs:
       # PR. With none pending (i.e. that PR was just merged), it publishes the
       # new version to npm and tags the GitHub release.
       - name: Create the version PR, or publish
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: npm run version
           publish: ${{ steps.npm.outputs.exists == 'true' && 'npm run release' || '' }}
