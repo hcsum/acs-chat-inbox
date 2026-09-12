@@ -205,12 +205,13 @@ Automated; nothing is published by hand.
 
 Publishing uses **npm trusted publishing (OIDC)**: no `NPM_TOKEN` exists
 anywhere in the repo. The job mints a short-lived credential from its own
-GitHub OIDC token, which is also what produces the provenance attestation
-(`publishConfig.provenance`). It needs npm >= 11.5.1, hence the
-`npm install -g npm@latest` step before `npm ci`. Two consequences: the
-publishing workflow's filename is part of the trust configuration on npmjs.com
-— renaming `release.yml` breaks publishing until the setting is updated — and a
-local `npm publish` is not part of the process.
+GitHub OIDC token, and npm generates the provenance attestation by itself —
+which is why `publishConfig` carries no `provenance` flag; setting it would
+only break a manual publish, which has no OIDC token to sign with. It needs
+npm >= 11.5.1, hence the `npm install -g npm@latest` step before `npm ci`. Two
+consequences: the publishing workflow's filename is part of the trust
+configuration on npmjs.com — renaming `release.yml` breaks publishing until the
+setting is updated — and a local `npm publish` is not part of the process.
 
 `pages.yml` deploys `demo/` to <https://hcsum.github.io/acs-chat-inbox/> on
 every push to `main`, building with `DEMO_BASE=/acs-chat-inbox/` so the asset

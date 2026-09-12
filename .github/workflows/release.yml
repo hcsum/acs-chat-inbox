@@ -27,16 +27,15 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            demo/package-lock.json
+          node-version: 24
+          # npm's guidance for release builds: no dependency cache, so what is
+          # published is built from the lockfile and nothing else.
+          package-manager-cache: false
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing (OIDC) needs npm 11.5.1 or newer; Node 22 ships an
-      # older one. No NPM_TOKEN is involved: npm exchanges the workflow's OIDC
-      # token for a short-lived credential and attaches build provenance.
+      # Trusted publishing (OIDC) needs npm 11.5.1 or newer. No NPM_TOKEN is
+      # involved: npm exchanges the workflow's OIDC token for a short-lived
+      # credential, and generates the provenance attestation by itself.
       - name: Use an npm that can publish with OIDC
         run: npm install -g npm@latest
 

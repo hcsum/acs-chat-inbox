@@ -286,8 +286,9 @@ package deliberately will not grow into.
 
 Releases are automated: changes carry a
 [changeset](https://github.com/changesets/changesets), merging to `main` opens a
-"Version Packages" pull request, and merging that publishes to npm with
-[provenance](https://docs.npmjs.com/generating-provenance-statements) and cuts
+"Version Packages" pull request, and merging that publishes to npm — with
+[provenance](https://docs.npmjs.com/generating-provenance-statements), from a
+workflow bound to this repository rather than from anyone's token — and cuts
 the GitHub release.
 
 ## License
