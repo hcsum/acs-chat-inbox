@@ -34,6 +34,18 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 3
+    # The demo imports the library from `src/`, which resolves `@types/react`
+    # from the root install. Letting the demo move to React 19 on its own puts
+    # two versions of those types in one compilation.
+    ignore:
+      - dependency-name: "react"
+        update-types: [version-update:semver-major]
+      - dependency-name: "react-dom"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react-dom"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
