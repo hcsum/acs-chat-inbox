@@ -82,7 +82,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22, 24]
+        # The active LTS lines. Node 20 went end-of-life in April 2026 and the
+        # test toolchain (jsdom 30) no longer runs on it; the published package
+        # itself is browser code and carries no such requirement.
+        node: [22, 24]
         react: [18, 19]
     steps:
       - uses: actions/checkout@v5

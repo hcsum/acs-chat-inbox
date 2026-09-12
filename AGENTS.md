@@ -134,8 +134,10 @@ npm run demo           # installs demo deps, then vite on :5173
 npm --prefix demo run typecheck   # the demo has its own tsc; root typecheck misses it
 ```
 
-CI (`.github/workflows/ci.yml`) runs all of those plus a Node 20/22/24 ×
-React 18/19 matrix, since the peer range claims all six.
+CI (`.github/workflows/ci.yml`) runs all of those plus a Node 22/24 ×
+React 18/19 matrix. Node 20 is not in it: it went end-of-life in April 2026 and
+jsdom 30 requires `^22.22 || ^24.15`. The published package has no Node
+requirement of its own — `engines` stays `>=20` for consumers.
 
 `check:exports` is not optional ceremony: it caught the original `exports` map
 handing `dist/index.d.ts` to CJS consumers, which made the package masquerade as

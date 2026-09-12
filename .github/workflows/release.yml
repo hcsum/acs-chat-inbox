@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            demo/package-lock.json
           registry-url: https://registry.npmjs.org
 
       # Trusted publishing (OIDC) needs npm 11.5.1 or newer; Node 22 ships an
@@ -38,6 +41,9 @@ jobs:
         run: npm install -g npm@latest
 
       - run: npm ci
+      # eslint's type-checked rules cover the demo, which resolves its own
+      # dependencies from `demo/`.
+      - run: npm ci --prefix demo
 
       - name: Verify before publishing
         run: |

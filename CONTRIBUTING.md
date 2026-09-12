@@ -7,6 +7,9 @@ into, and why.
 
 ## Getting set up
 
+Node 22 or newer (see `.nvmrc`) — the test toolchain requires it, though the
+published package does not.
+
 ```sh
 git clone https://github.com/hcsum/acs-chat-inbox.git
 cd acs-chat-inbox
@@ -31,8 +34,8 @@ npm run test:watch     # vitest in watch mode
 npm run check:exports  # publint + attw against the packed tarball
 ```
 
-CI runs all of these, plus a Node 20/22/24 × React 18/19 matrix, because the
-peer range claims to support all six combinations.
+CI runs all of these, plus a Node 22/24 × React 18/19 matrix, because the peer
+range claims to support React 18 and 19 alike.
 
 ## Changesets
 
