@@ -1,0 +1,61 @@
+{
+  "name": "acs-chat-inbox",
+  "version": "0.1.0",
+  "description": "An inbox shell for Azure Communication Services chat: a thread list next to ChatComposite, with unread counts and latest-message previews.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": {
+      "types": "./dist/styles.d.css.ts",
+      "default": "./dist/styles.css"
+    }
+  },
+  "keywords": [
+    "azure",
+    "communication-services",
+    "acs",
+    "chat",
+    "thread-list",
+    "inbox",
+    "react"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "demo": "npm --prefix demo install && npm --prefix demo run dev",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@azure/communication-chat": ">=1.4.0",
+    "@azure/communication-common": ">=2.2.0",
+    "@azure/communication-react": ">=1.15.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@azure/communication-chat": "1.6.0-beta.7",
+    "@azure/communication-common": "^2.3.1",
+    "@azure/communication-react": "1.28.0-beta.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}
