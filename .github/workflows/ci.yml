@@ -24,8 +24,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            demo/package-lock.json
 
       - run: npm ci
+      # eslint covers the demo too, and its type-checked rules need the demo's
+      # own dependencies resolvable.
+      - run: npm ci --prefix demo
 
       - name: Check formatting
         run: npm run format:check
