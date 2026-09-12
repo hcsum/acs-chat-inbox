@@ -6,16 +6,23 @@
 [![types](https://img.shields.io/npm/types/acs-chat-inbox)](https://www.npmjs.com/package/acs-chat-inbox)
 [![license](https://img.shields.io/npm/l/acs-chat-inbox.svg)](./LICENSE)
 
-An inbox shell for Azure Communication Services chat: a thread list beside
-[`ChatComposite`](https://azure.github.io/communication-ui-library/?path=/docs/composites-chat-basicexample--docs),
-with unread counts and latest-message previews.
+**React components for a two-pane chat inbox on Azure Communication Services.**
+A thread list with unread badges, message previews and relative times on the
+left; ACS's own
+[`ChatComposite`](https://azure.github.io/communication-ui-library/?path=/docs/composites-chat-basicexample--docs)
+on the right.
+
+![The inbox: a thread list with unread badges and message previews beside a chat pane](https://raw.githubusercontent.com/hcsum/acs-chat-inbox/main/docs/screenshot.png)
+
+**[Try the live demo →](https://hcsum.github.io/acs-chat-inbox/)** It runs
+against an in-memory stand-in for `ChatClient`, so no Azure account or token is
+needed to click around.
 
 `@azure/communication-react` ships the chat pane but no thread list, so every app
 that needs a WhatsApp-style two-pane inbox rebuilds the same shell. This is that
-shell, and nothing else.
-
-**[Live demo](https://hcsum.github.io/acs-chat-inbox/)** — runs against an
-in-memory stand-in for `ChatClient`, so no Azure resource is needed to try it.
+shell, and nothing else: drop in `<AcsChatInbox />` for the whole thing, or take
+`<AcsThreadList />` and the headless `useAcsChatInbox()` hook and build your own
+layout around them.
 
 ## Install
 

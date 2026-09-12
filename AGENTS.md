@@ -66,6 +66,7 @@ src/*.test.ts(x)       vitest; excluded from the build by tsup's explicit entry
 
 demo/                  Vite playground, not published (`files` is `["dist"]`)
 demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
+docs/screenshot.png    the README's screenshot, taken from the built demo
 
 .changeset/            pending release notes, one file per change
 .github/workflows/     ci.yml, release.yml, pages.yml
@@ -98,6 +99,12 @@ demo/src/mockChatClient.ts  in-memory stand-in for `ChatClient`
 - Realtime events use a different `type` vocabulary from the REST enum:
   `"Text"` / `"RichText/Html"`, not `"text"` / `"html"`. Nothing filters on the
   realtime path today; if that changes, don't copy the lowercase comparison.
+- The demo imports the library from `../../src`, so those files resolve `react`
+  from the **root** install while the demo's own files resolve it from `demo/`.
+  Without `resolve.dedupe: ["react", "react-dom"]` in `demo/vite.config.ts` the
+  bundle carries two Reacts and every hook throws `Cannot read properties of
+null (reading 'useState')`. It builds cleanly either way — the Pages deploy
+  was a blank page until this was found — so CI's demo build does not catch it.
 - Previews render as plain text. lyfly used `dangerouslySetInnerHTML` for
   `html`-type messages; the package strips tags instead. Don't reintroduce it.
 - Styles: three layers — CSS variables, `data-slot` / `data-state` attributes,

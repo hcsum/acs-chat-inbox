@@ -1,7 +1,7 @@
 {
   "name": "acs-chat-inbox",
   "version": "0.1.0",
-  "description": "An inbox shell for Azure Communication Services chat: a thread list next to ChatComposite, with unread counts and latest-message previews.",
+  "description": "React components for a chat inbox on Azure Communication Services: a thread list with unread badges and message previews, beside the ACS ChatComposite chat pane.",
   "license": "MIT",
   "author": "hcsum",
   "homepage": "https://hcsum.github.io/acs-chat-inbox/",
@@ -40,13 +40,17 @@
     "./package.json": "./package.json"
   },
   "keywords": [
+    "react",
+    "react-component",
+    "chat",
+    "chat-ui",
+    "inbox",
+    "thread-list",
+    "unread-badge",
     "azure",
     "communication-services",
     "acs",
-    "chat",
-    "thread-list",
-    "inbox",
-    "react"
+    "chatcomposite"
   ],
   "engines": {
     "node": ">=20"
