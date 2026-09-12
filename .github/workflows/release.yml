@@ -21,7 +21,7 @@ jobs:
       pull-requests: write # open and update the "Version Packages" PR
       id-token: write # mint the OIDC token npm trusted publishing needs
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # changesets reads the history to build the changelog
 
