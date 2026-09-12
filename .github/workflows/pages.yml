@@ -23,8 +23,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: demo/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            demo/package-lock.json
 
+      # The demo imports the library from `src/`, so those files resolve React
+      # and the ACS types from the root install, not from `demo/`.
+      - run: npm ci
       - run: npm ci --prefix demo
 
       # Pages serves the site from /<repo>/, so the demo's asset URLs have to
