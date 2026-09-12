@@ -13,6 +13,21 @@ updates:
     ignore:
       - dependency-name: "@azure/*"
         update-types: [version-update:semver-major]
+      # Dev deps pin React 18: `@azure/communication-react` peers
+      # `@types/react` `<19`, so a major bump here breaks the typecheck the
+      # package is built against. The React 19 support claim is covered by the
+      # CI matrix instead.
+      - dependency-name: "react"
+        update-types: [version-update:semver-major]
+      - dependency-name: "react-dom"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react-dom"
+        update-types: [version-update:semver-major]
+      # typescript-eslint peers `typescript <6.1.0`.
+      - dependency-name: "typescript"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: npm
     directory: /demo

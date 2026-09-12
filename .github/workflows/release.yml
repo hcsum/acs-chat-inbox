@@ -21,7 +21,7 @@ jobs:
       pull-requests: write # open and update the "Version Packages" PR
       id-token: write # mint the OIDC token npm trusted publishing needs
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # changesets reads the history to build the changelog
 
@@ -71,12 +71,11 @@ jobs:
       # PR. With none pending (i.e. that PR was just merged), it publishes the
       # new version to npm and tags the GitHub release.
       - name: Create the version PR, or publish
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: npm run version
-          publish: ${{ steps.npm.outputs.exists == 'true' && 'npm run release' || '' }}
-          commit: "chore: version packages"
-          title: "chore: version packages"
-          createGithubReleases: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-script: npm run version
+          publish-script: ${{ steps.npm.outputs.exists == 'true' && 'npm run release' || '' }}
+          commit-message: "chore: version packages"
+          pr-title: "chore: version packages"
+          create-github-releases: true
