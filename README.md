@@ -20,6 +20,20 @@ Peer dependencies you already have if you use ACS chat:
 npm install @azure/communication-react @azure/communication-chat @azure/communication-common react react-dom
 ```
 
+### React 19
+
+This package works with React 19, but `@azure/communication-react` does not
+support it: as of 1.34.0 its own peer range is `react: ">=16.8.0 <19.0.0"`, so
+installing on React 19 fails peer resolution.
+
+```sh
+npm install acs-chat-inbox --legacy-peer-deps
+```
+
+That is Microsoft's constraint, not this package's, and `--legacy-peer-deps`
+only silences the check — it does not make the composites tested on React 19.
+On React 18 nothing extra is needed.
+
 ## Usage
 
 ```tsx
